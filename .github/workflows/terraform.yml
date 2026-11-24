@@ -1,0 +1,104 @@
+name: terraform
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+    inputs:
+      replace:
+        description: "Space-separated resource addresses to force-replace (core)"
+        required: false
+        default: ""
+permissions:
+  contents: read
+concurrency:
+  group: terraform-state
+  cancel-in-progress: false
+env:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+  OVH_ENDPOINT: ovh-eu
+  OVH_CLIENT_ID: ${{ secrets.OVH_CLIENT_ID }}
+  OVH_CLIENT_SECRET: ${{ secrets.OVH_CLIENT_SECRET }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+jobs:
+  checks:
+    name: fmt / validate / scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - run: terraform fmt -check -recursive -diff
+      - run: terraform -chdir=core init -backend=false && terraform -chdir=core validate
+      - run: terraform -chdir=workload init -backend=false && terraform -chdir=workload validate
+      - name: security scan (checkov)
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: .
+          framework: terraform,helm,kubernetes,secrets
+          soft_fail: true
+  core:
+    needs: checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - run: terraform init -backend-config=backend.hcl
+      - name: plan
+        id: plan
+        env:
+          REPLACE: ${{ github.event.inputs.replace }}
+        run: |
+          args=()
+          for r in $REPLACE; do args+=("-replace=$r"); done
+          set +e
+          terraform plan -detailed-exitcode -no-color "${args[@]}" -out=tfplan | tee plan.txt
+          ec=${PIPESTATUS[0]}
+          set -e
+          echo "exitcode=$ec" >> "$GITHUB_OUTPUT"
+          { echo '### core plan'; echo '```'; tail -n 60 plan.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          [ "$ec" -ne 1 ]
+      - name: drift detected
+        if: github.event_name == 'schedule' && steps.plan.outputs.exitcode == '2'
+        run: echo "::error::DRIFT in core" && exit 1
+      - name: apply
+        if: github.ref == 'refs/heads/main' && github.event_name != 'schedule' && github.event_name != 'pull_request' && steps.plan.outputs.exitcode == '2'
+        run: terraform apply -auto-approve tfplan
+  workload:
+    needs: core
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workload
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - run: terraform init -backend-config=backend.hcl
+      - name: plan
+        id: plan
+        run: |
+          set +e
+          terraform plan -detailed-exitcode -no-color -out=tfplan | tee plan.txt
+          ec=${PIPESTATUS[0]}
+          set -e
+          echo "exitcode=$ec" >> "$GITHUB_OUTPUT"
+          { echo '### workload plan'; echo '```'; tail -n 60 plan.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          [ "$ec" -ne 1 ]
+      - name: drift detected
+        if: github.event_name == 'schedule' && steps.plan.outputs.exitcode == '2'
+        run: echo "::error::DRIFT in workload" && exit 1
+      - name: apply
+        if: github.ref == 'refs/heads/main' && github.event_name != 'schedule' && github.event_name != 'pull_request' && steps.plan.outputs.exitcode == '2'
+        run: terraform apply -auto-approve tfplan

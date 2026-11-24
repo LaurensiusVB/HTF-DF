@@ -1,0 +1,42 @@
+
+=================== Project users (code has ONE: achrona-scrolls-app)
+1013890	user-Gw67GPcTwCd6	achrona-tfstate	roles=objectstore_operator	ok
+1013903	user-rJFCEQXZKRCW	achrona-scrolls-app	roles=objectstore_operator	ok
+1014222	user-NWmeyCgbau6x	debug-admin	roles=administrator	ok
+
+=================== S3 policy + keys of every user
+--- user 1013890
+{"policy":"{\"Statement\":[{\"Action\":[\"s3:GetObject\",\"s3:PutObject\",\"s3:DeleteObject\",\"s3:ListBucket\",\"s3:GetBucketLocation\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:s3:::achrona-299a3aef-tfstate\",\"arn:aws:s3:::achrona-299a3aef-tfstate/*\"],\"Sid\":\"TerraformState\"}]}"}
+    S3 keys:
+      eec9871d2d7243238c1c2d0b203a8628
+--- user 1013903
+{"policy":"{\"Statement\":[{\"Action\":[\"s3:*\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:s3:::*\"],\"Sid\":\"TempFixAllAccess\"}]}"}
+    S3 keys:
+      434df27d45b441e0ad82326a8f280bff
+      52f5b33434154f89875b775143b024a8
+--- user 1014222
+{"policy":"{\"Statement\":[]}"}
+    S3 keys:
+      41ff5d7ed553445e8f3f97361532e406
+
+=================== S3 buckets in GRA (encryption / versioning)
+{"name":"achrona-299a3aef-scrolls","encryption":{"sseAlgorithm":"plaintext"},"versioning":{"status":"suspended"},"objectsCount":0,"tags":{"environment":"hack-the-future","managed-by":"terraform","team":"dg"}}
+{"name":"achrona-299a3aef-tfstate","encryption":{"sseAlgorithm":"AES256"},"versioning":{"status":"enabled"},"objectsCount":10,"tags":{"managed-by":"terraform-bootstrap","purpose":"terraform-state","team":"dg"}}
+
+=================== Instances (code has NONE besides kube nodes)
+hotfix-pool-node-de5a41	e81b46f8-1159-4e14-b0ba-cad655e6540b	ACTIVE	GRA11
+achrona-pool-node-708714	e81b46f8-1159-4e14-b0ba-cad655e6540b	ACTIVE	GRA11
+achrona-pool-node-d039d1	e81b46f8-1159-4e14-b0ba-cad655e6540b	ACTIVE	GRA11
+
+=================== Private networks (code has ONE: achrona-net)
+
+=================== Kubernetes clusters, node pools, IP restrictions
+{"name":"achrona-kube","version":"1.35.2-6","updatePolicy":"NEVER_UPDATE","status":"READY"}
+  pool achrona-pool	b3-8	min=2 max=5
+  pool hotfix-pool	b3-8	min=1 max=1
+  ipRestrictions:
+["198.51.100.0/24"]
+
+=================== Container registries and users (code has ONE user: scribe)
+{"name":"achrona-registry","status":"READY","url":"https://sk6qkvrz.gra7.container-registry.ovh.net"}
+  user scribe	scribe@achrona.example.com
