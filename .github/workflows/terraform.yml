@@ -2,7 +2,7 @@ name: terraform
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, fix/level3-4]
   schedule:
     - cron: "17 * * * *"
   workflow_dispatch:
@@ -72,7 +72,7 @@ jobs:
         if: github.event_name == 'schedule' && steps.plan.outputs.exitcode == '2'
         run: echo "::error::DRIFT in core" && exit 1
       - name: apply
-        if: github.ref == 'refs/heads/main' && github.event_name != 'schedule' && github.event_name != 'pull_request' && steps.plan.outputs.exitcode == '2'
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/level3-4') && github.event_name != 'schedule' && github.event_name != 'pull_request' && steps.plan.outputs.exitcode == '2'
         run: terraform apply -auto-approve tfplan
   workload:
     needs: core
@@ -100,5 +100,5 @@ jobs:
         if: github.event_name == 'schedule' && steps.plan.outputs.exitcode == '2'
         run: echo "::error::DRIFT in workload" && exit 1
       - name: apply
-        if: github.ref == 'refs/heads/main' && github.event_name != 'schedule' && github.event_name != 'pull_request' && steps.plan.outputs.exitcode == '2'
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix/level3-4') && github.event_name != 'schedule' && github.event_name != 'pull_request' && steps.plan.outputs.exitcode == '2'
         run: terraform apply -auto-approve tfplan
