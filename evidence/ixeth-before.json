@@ -1,0 +1,35 @@
+{
+  "remedy": {
+    "diagnosis": "scrolls-app was killed for using more memory than its limit of 64Mi.",
+    "actions": [
+      {
+        "type": "resources",
+        "namespace": "scrolls",
+        "deployment": "scrolls-app",
+        "container": "scrolls-app",
+        "memory": "128Mi"
+      },
+      {
+        "type": "resources",
+        "namespace": "oracle",
+        "deployment": "ixeth",
+        "container": "seer",
+        "cpu": "1500m",
+        "cpu_request": "500m",
+        "memory": "2Gi",
+        "memory_request": "1Gi"
+      },
+      {
+        "type": "scale",
+        "namespace": "oracle",
+        "deployment": "ixeth",
+        "replicas": 2
+      }
+    ],
+    "commit_message": "Raise scrolls-app memory limit to 128Mi",
+    "source": "rote"
+  },
+  "shown": [
+    "set scrolls/scrolls-app (scrolls-app): memory 128Mi"
+  ]
+}
