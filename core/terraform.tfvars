@@ -5,3 +5,4 @@ vlan_id        = 104
 name_prefix    = "achrona"
 region         = "GRA11"
 storage_region = "GRA"
+node_min_count = 2
