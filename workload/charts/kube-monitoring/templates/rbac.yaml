@@ -40,7 +40,8 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: monitoring-collector-reader
+  # New name: roleRef is immutable, so the old cluster-admin binding is replaced.
+  name: monitoring-collector-least-privilege
   labels:
     app.kubernetes.io/part-of: monitoring
     {{- include "km.labels" . | nindent 4 }}
