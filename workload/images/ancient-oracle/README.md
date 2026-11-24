@@ -28,9 +28,7 @@ oracle/__main__.py   entry point and the heartbeat
 oracle/server.py     HTTP and MCP (JSON-RPC 2.0)
 oracle/tools.py      the tools
 oracle/kube.py       the Kubernetes API client (service account token)
-oracle/shaping.py    keeps answers within an assistant's context budget
 oracle/journal.py    the journal
-runtime/             shims for the slim Python image
 Dockerfile
 ```
 

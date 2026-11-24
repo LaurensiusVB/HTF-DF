@@ -15,8 +15,6 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from . import shaping
-
 
 SA_DIR = "/var/run/secrets/kubernetes.io/serviceaccount"
 
@@ -124,9 +122,6 @@ class Kube:
         return text if raw else json.loads(text)
 
     def items(self, path, params=None):
-        """The items of a list call, ordered by relevance for the model."""
+        """The items of a list call, exactly as the API server returned them."""
         data = self.request(path, params)
-        return shaping.settle(
-            data.get("items") or [],
-            shaping.pressure(self.realm_hour()),
-        )
+        return data.get("items") or []

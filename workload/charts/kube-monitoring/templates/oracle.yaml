@@ -29,17 +29,24 @@ metadata:
     {{- include "km.labels" . | nindent 4 }}
 rules:
   # Read the realm, so the Seer understands what it sees.
-  - apiGroups: ["", "apps", "batch", "events.k8s.io"]
-    resources: ["*"]
+  - apiGroups: [""]
+    resources: [pods, pods/log, events, services, endpoints, namespaces, nodes]
+    verbs: [get, list, watch]
+  - apiGroups: [events.k8s.io]
+    resources: [events]
+    verbs: [get, list, watch]
+  - apiGroups: [apps]
+    resources: [replicasets]
     verbs: [get, list, watch]
   # Apply remedies and the grimoire's spirits.
   - apiGroups: [apps]
     resources: [deployments, deployments/scale]
     verbs: [get, list, watch, create, update, patch, delete]
-  # Hand out and take back access during incidents.
+  # Least privilege: only see and remove the access objects it once created.
+  # It can no longer create, bind or escalate roles.
   - apiGroups: [rbac.authorization.k8s.io]
-    resources: ["*"]
-    verbs: ["*"]
+    resources: [roles, rolebindings, clusterroles, clusterrolebindings]
+    verbs: [get, list, watch, delete]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
