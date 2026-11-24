@@ -1,0 +1,27 @@
+
+=================== Project users (code has ONE: achrona-scrolls-app)
+1013890	user-Gw67GPcTwCd6	achrona-tfstate	roles=objectstore_operator	ok
+1013903	user-rJFCEQXZKRCW	achrona-scrolls-app	roles=objectstore_operator	ok
+
+=================== S3 policy + keys of every user
+
+=================== S3 buckets in GRA (encryption / versioning)
+{"name":"achrona-299a3aef-scrolls","encryption":{"sseAlgorithm":"AES256"},"versioning":{"status":"enabled"},"objectsCount":0,"tags":{"environment":"hack-the-future","managed-by":"terraform","team":"dg"}}
+{"name":"achrona-299a3aef-tfstate","encryption":{"sseAlgorithm":"AES256"},"versioning":{"status":"enabled"},"objectsCount":33,"tags":{"managed-by":"terraform-bootstrap","purpose":"terraform-state","team":"dg"}}
+
+=================== Instances (code has NONE besides kube nodes)
+achrona-pool-node-708714	e81b46f8-1159-4e14-b0ba-cad655e6540b	ACTIVE	GRA11
+achrona-pool-node-d039d1	e81b46f8-1159-4e14-b0ba-cad655e6540b	ACTIVE	GRA11
+
+=================== Private networks (code has ONE: achrona-net)
+pn-1374911_104	achrona-net	vlan=104
+
+=================== Kubernetes clusters, node pools, IP restrictions
+{"name":"achrona-kube","version":"1.35.2-6","updatePolicy":"MINIMAL_DOWNTIME","status":"READY"}
+  pool achrona-pool	b3-8	min=2 max=3
+  ipRestrictions:
+["0.0.0.0/0"]
+
+=================== Container registries and users (code has ONE user: scribe)
+{"name":"achrona-registry","status":"READY","url":"https://sk6qkvrz.gra7.container-registry.ovh.net"}
+  user scribe	scribe@achrona.example.com

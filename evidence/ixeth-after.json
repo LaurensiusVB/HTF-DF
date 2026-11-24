@@ -1,0 +1,9 @@
+[
+  {
+    "type": "resources",
+    "namespace": "scrolls",
+    "deployment": "scrolls-app",
+    "container": "scrolls-app",
+    "memory": "128Mi"
+  }
+]

@@ -1,0 +1,1 @@
+["arn:aws:s3:::achrona-299a3aef-scrolls","arn:aws:s3:::achrona-299a3aef-scrolls/*"]
